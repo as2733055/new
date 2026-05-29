@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔒 Encrypted Chat Demo - Standalone</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 900px;
+            display: flex;
+            height: 90vh;
+            max-height: 700px;
+            overflow: hidden;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 300px;
+            background: #f8f9fa;
+            border-right: 1px solid #e0e0e0;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .sidebar-header h2 {
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar-header p {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .users-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0.5rem;
+        }
+
+        .user-item {
+            padding: 1rem;
+            margin: 0.5rem 0;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .user-item:hover {
+            background: #e8ecff;
+            border-color: #667eea;
+        }
+
+        .user-item.active {
+            background: #e8ecff;
+            border-color: #667eea;
+            font-weight: 600;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .user-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .user-info .name {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .user-info .status {
+            font-size: 0.8rem;
+            color: #999;
+        }
+
+        .online-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #4caf50;
+            display: inline-block;
+            margin-right: 0.3rem;
+        }
+
+        /* Main Chat Area */
+        .main-chat {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: white;
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #667eea;
+        }
+
+        .chat-header h3 {
+            font-size: 1.1rem;
+        }
+
+        .chat-header-info {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .messages-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .message {
+            display: flex;
+            gap: 0.8rem;
+            animation: slideIn 0.3s ease;
+        }
+
+        .message.sent {
+            justify-content: flex-end;
+        }
+
+        .message-avatar {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+        }
+
+        .message.sent .message-avatar {
+            order: 2;
+        }
+
+        .message-bubble {
+            max-width: 60%;
+            padding: 1rem;
+            border-radius: 15px;
+            word-wrap: break-word;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .message.received .message-bubble {
+            background: #e0e0e0;
+            color: #333;
+            border-radius: 15px 15px 15px 0;
+        }
+
+        .message.sent .message-bubble {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px 15px 0 15px;
+        }
+
+        .message-time {
+            font-size: 0.75rem;
+            color: #999;
+            padding: 0 0.5rem;
+            display: flex;
+            align-items: flex-end;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #999;
+            text-align: center;
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.3;
+        }
+
+        .empty-state p {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .empty-state-hint {
+            font-size: 0.9rem;
+            opacity: 0.7;
+        }
+
+        /* Input Area */
+        .input-area {
+            padding: 1rem;
+            background: #f8f9fa;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            gap: 0.8rem;
+        }
+
+        .input-area input {
+            flex: 1;
+            padding: 0.8rem 1rem;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            font-size: 0.95rem;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .input-area input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .input-area button {
+            padding: 0.8rem 2rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .input-area button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .input-area button:active {
+            transform: translateY(0);
+        }
+
+        /* Scrollbar */
+        .messages-container::-webkit-scrollbar,
+        .users-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .messages-container::-webkit-scrollbar-track,
+        .users-list::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .messages-container::-webkit-scrollbar-thumb,
+        .users-list::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 3px;
+        }
+
+        .messages-container::-webkit-scrollbar-thumb:hover,
+        .users-list::-webkit-scrollbar-thumb:hover {
+            background: #999;
+        }
+
+        /* Info Box */
+        .info-box {
+            background: #e8ecff;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            color: #667eea;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+
+        .info-icon {
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                max-height: 200px;
+                border-right: none;
+                border-bottom: 1px solid #e0e0e0;
+            }
+
+            .users-list {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 0.5rem;
+                padding: 0.5rem;
+                align-content: flex-start;
+            }
+
+            .user-item {
+                flex: 0 1 auto;
+                margin: 0;
+                padding: 0.5rem;
+            }
+
+            .user-info .status {
+                display: none;
+            }
+
+            .message-bubble {
+                max-width: 85%;
+            }
+
+            .main-chat {
+                flex: 1;
+            }
+        }
+
+        .typing-indicator {
+            display: flex;
+            gap: 4px;
+            align-items: flex-end;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #999;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+            0%, 60%, 100% {
+                opacity: 0.5;
+                transform: translateY(0);
+            }
+            30% {
+                opacity: 1;
+                transform: translateY(-8px);
+            }
+        }
+
+        .system-message {
+            text-align: center;
+            color: #999;
+            font-size: 0.85rem;
+            padding: 0.5rem;
+            background: #f0f0f0;
+            border-radius: 8px;
+            margin: 0.5rem 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar with Users -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2>🔒 Encrypted Chat</h2>
+                <p>Demo Conversation</p>
+            </div>
+            <div class="users-list" id="usersList">
+                <div class="user-item active" onclick="selectUser('alice', this)">
+                    <div class="user-avatar">A</div>
+                    <div class="user-info">
+                        <div class="name">Alice</div>
+                        <div class="status"><span class="online-dot"></span>Online</div>
+                    </div>
+                </div>
+                <div class="user-item" onclick="selectUser('bob', this)">
+                    <div class="user-avatar">B</div>
+                    <div class="user-info">
+                        <div class="name">Bob</div>
+                        <div class="status"><span class="online-dot"></span>Online</div>
+                    </div>
+                </div>
+                <div class="user-item" onclick="selectUser('charlie', this)">
+                    <div class="user-avatar">C</div>
+                    <div class="user-info">
+                        <div class="name">Charlie</div>
+                        <div class="status">Offline</div>
+                    </div>
+                </div>
+                <div class="user-item" onclick="selectUser('diana', this)">
+                    <div class="user-avatar">D</div>
+                    <div class="user-info">
+                        <div class="name">Diana</div>
+                        <div class="status"><span class="online-dot"></span>Online</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Chat Area -->
+        <div class="main-chat">
+            <div class="chat-header">
+                <div>
+                    <h3 id="chatTitle">Select a conversation</h3>
+                    <div class="chat-header-info" id="chatStatus">Click a user to start chatting</div>
+                </div>
+            </div>
+
+            <div class="messages-container" id="messagesContainer">
+                <div class="empty-state">
+                    <div class="empty-state-icon">💬</div>
+                    <p class="empty-state-p">Select a user to start chatting</p>
+                    <div class="empty-state-hint">Click on a user from the list to open conversation</div>
+                </div>
+            </div>
+
+            <div class="input-area">
+                <input 
+                    type="text" 
+                    id="messageInput" 
+                    placeholder="Type a message..." 
+                    disabled
+                    onkeypress="if(event.key === 'Enter') sendMessage()"
+                >
+                <button onclick="sendMessage()" id="sendBtn" disabled>Send</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const conversations = {
+            alice: [
+                { sender: 'alice', text: 'Hey! How are you doing?', time: '10:30' },
+                { sender: 'user', text: 'I\'m doing great! Just tested the encrypted messenger 🔒', time: '10:31' },
+                { sender: 'alice', text: 'Nice! The encryption is amazing!', time: '10:32' },
+                { sender: 'alice', text: 'No one can read our messages, right?', time: '10:33' },
+                { sender: 'user', text: 'Exactly! Military-grade RSA-2048 + AES-256 🛡️', time: '10:33' },
+            ],
+            bob: [
+                { sender: 'bob', text: 'Hi there! 👋', time: '09:15' },
+                { sender: 'user', text: 'Hey Bob! How\'s it going?', time: '09:16' },
+                { sender: 'bob', text: 'All good! Testing this amazing chat app', time: '09:17' },
+            ],
+            charlie: [
+                { sender: 'system', text: 'No messages yet. Start a conversation!' },
+            ],
+            diana: [
+                { sender: 'diana', text: 'This encrypted messenger is awesome! 🚀', time: '15:45' },
+                { sender: 'user', text: 'Right? Super secure and easy to use', time: '15:46' },
+            ]
+        };
+
+        let currentUser = 'alice';
+
+        function selectUser(userId, element) {
+            currentUser = userId;
+            
+            // Update active state
+            document.querySelectorAll('.user-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            element.classList.add('active');
+
+            // Update chat header
+            const userName = element.querySelector('.name').textContent;
+            const userStatus = element.querySelector('.status').textContent;
+            document.getElementById('chatTitle').textContent = userName;
+            document.getElementById('chatStatus').textContent = userStatus;
+
+            // Load messages
+            loadMessages(userId);
+
+            // Enable input
+            document.getElementById('messageInput').disabled = false;
+            document.getElementById('sendBtn').disabled = false;
+            document.getElementById('messageInput').focus();
+        }
+
+        function loadMessages(userId) {
+            const container = document.getElementById('messagesContainer');
+            const msgs = conversations[userId] || [];
+            
+            container.innerHTML = '';
+            
+            if (msgs.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">💬</div>
+                        <p>No messages yet</p>
+                        <div class="empty-state-hint">Start the conversation!</div>
+                    </div>
+                `;
+                return;
+            }
+
+            msgs.forEach((msg, index) => {
+                setTimeout(() => {
+                    const messageEl = document.createElement('div');
+                    
+                    if (msg.sender === 'system') {
+                        messageEl.className = 'system-message';
+                        messageEl.textContent = msg.text;
+                    } else {
+                        messageEl.className = 'message ' + (msg.sender === 'user' ? 'sent' : 'received');
+                        
+                        if (msg.sender !== 'user') {
+                            const avatar = document.createElement('div');
+                            avatar.className = 'message-avatar';
+                            avatar.textContent = msg.sender.charAt(0).toUpperCase();
+                            messageEl.appendChild(avatar);
+                        }
+
+                        const bubble = document.createElement('div');
+                        bubble.className = 'message-bubble';
+                        bubble.textContent = msg.text;
+                        messageEl.appendChild(bubble);
+
+                        if (msg.time) {
+                            const time = document.createElement('div');
+                            time.className = 'message-time';
+                            time.textContent = msg.time;
+                            messageEl.appendChild(time);
+                        }
+
+                        if (msg.sender === 'user') {
+                            messageEl.insertBefore(bubble, messageEl.firstChild);
+                        }
+                    }
+                    
+                    container.appendChild(messageEl);
+                    container.scrollTop = container.scrollHeight;
+                }, index * 100);
+            });
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const text = input.value.trim();
+
+            if (!text) return;
+
+            // Add message to conversation
+            const message = {
+                sender: 'user',
+                text: text,
+                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            };
+
+            conversations[currentUser].push(message);
+
+            // Display message
+            const container = document.getElementById('messagesContainer');
+            if (container.querySelector('.empty-state')) {
+                container.innerHTML = '';
+            }
+
+            const messageEl = document.createElement('div');
+            messageEl.className = 'message sent';
+            messageEl.innerHTML = `
+                <div class="message-time">${message.time}</div>
+                <div class="message-bubble">${escapeHtml(text)}</div>
+            `;
+            container.appendChild(messageEl);
+            container.scrollTop = container.scrollHeight;
+
+            input.value = '';
+
+            // Simulate response
+            setTimeout(() => {
+                const typingEl = document.createElement('div');
+                typingEl.className = 'message received';
+                typingEl.innerHTML = `
+                    <div class="message-avatar">${currentUser.charAt(0).toUpperCase()}</div>
+                    <div class="typing-indicator">
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                    </div>
+                `;
+                container.appendChild(typingEl);
+                container.scrollTop = container.scrollHeight;
+
+                setTimeout(() => {
+                    typingEl.remove();
+                    
+                    const responses = {
+                        alice: ['That\'s great! 😊', 'I totally agree!', '🔒 Encryption is key!', 'Love this app!'],
+                        bob: ['Awesome!', 'Right on!', 'Super cool!', 'Nice one!'],
+                        diana: ['Absolutely!', 'Same here!', '✨ Best messenger ever', 'Love your thoughts!']
+                    };
+
+                    const responseText = responses[currentUser][Math.floor(Math.random() * responses[currentUser].length)];
+                    
+                    const responseEl = document.createElement('div');
+                    responseEl.className = 'message received';
+                    responseEl.innerHTML = `
+                        <div class="message-avatar">${currentUser.charAt(0).toUpperCase()}</div>
+                        <div class="message-bubble">${responseText}</div>
+                        <div class="message-time">${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                    `;
+                    container.appendChild(responseEl);
+                    container.scrollTop = container.scrollHeight;
+                    
+                    conversations[currentUser].push({
+                        sender: currentUser,
+                        text: responseText,
+                        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                    });
+                }, 1500);
+            }, 500);
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Initialize with first user
+        selectUser('alice', document.querySelector('.user-item.active'));
+    </script>
+</body>
+</html>

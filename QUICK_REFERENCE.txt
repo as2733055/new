@@ -1,0 +1,164 @@
+# ⚡ EMERGENCY MESSAGING - QUICK REFERENCE
+
+## 🚀 GET STARTED IN 60 SECONDS
+
+```bash
+cd /workspaces/new
+docker-compose up -d
+open http://localhost:3000
+```
+
+---
+
+## 👤 USER QUICK START
+
+### 1. Register
+- Go to http://localhost:3000
+- Click "Register"
+- Username, Email, Password
+- Click Register
+
+### 2. Find Friend
+- Click "Users" tab
+- Type username to search
+- Click their name
+
+### 3. Send Message
+- Type in message box
+- Press Enter or click Send
+- ✅ Message encrypted & sent!
+
+---
+
+## 🔐 SECURITY INFO
+
+✅ All messages encrypted
+✅ Server can't read them
+✅ Only you + recipient can see
+✅ Automatic encryption
+✅ No action needed from you
+
+---
+
+## 📱 ACCESS URLS
+
+| What | URL |
+|------|-----|
+| Chat App | http://localhost:3000 |
+| API | http://localhost:8000 |
+| API Docs | http://localhost:8000/docs |
+| Health | http://localhost:8000/health |
+
+---
+
+## 🛑 EMERGENCY STOP
+
+```bash
+docker-compose down
+```
+
+---
+
+## 📊 CHECK STATUS
+
+```bash
+docker-compose ps
+```
+
+Expected:
+```
+✅ backend     - Up
+✅ frontend    - Up
+✅ db          - Up (healthy)
+```
+
+---
+
+## 🆘 TROUBLESHOOTING
+
+| Problem | Solution |
+|---------|----------|
+| Can't access app | Check: docker-compose ps |
+| Backend error | Run: docker-compose logs backend |
+| Can't send message | Refresh page, check connection |
+| Database issue | Run: docker-compose down -v && docker-compose up -d |
+
+---
+
+## 📞 SHARE WITH FRIENDS
+
+Tell them:
+```
+Go to: http://SERVER-IP:3000
+Register with username
+Search for me
+Start messaging!
+```
+
+---
+
+## 💾 SYSTEM FILES
+
+```
+/workspaces/new/
+├── docker-compose.yml          ← Start here
+├── USER_GUIDE.md               ← How to use
+├── EMERGENCY_QUICK_START.md    ← Fast setup
+├── backend/                    ← API code
+└── frontend/                   ← Chat app code
+```
+
+---
+
+## ⚙️ COMMANDS
+
+```bash
+# Start
+docker-compose up -d
+
+# Stop
+docker-compose down
+
+# Status
+docker-compose ps
+
+# Logs
+docker-compose logs
+
+# Restart
+docker-compose restart
+
+# Reset (deletes data!)
+docker-compose down -v && docker-compose up -d
+```
+
+---
+
+## 🎯 IN EMERGENCY
+
+1. ✅ Start system
+2. ✅ Share URL with team
+3. ✅ Everyone registers
+4. ✅ Start messaging
+5. ✅ All encrypted automatically!
+
+---
+
+## 📚 DOCS
+
+- **USER_GUIDE.md** - How to use app (5 min)
+- **EMERGENCY_QUICK_START.md** - Setup (2 min)
+- **EMERGENCY_DEPLOYMENT.md** - Scaling (10 min)
+- **SYSTEM_STATUS.md** - Overview (quick ref)
+
+---
+
+## ✅ READY TO USE!
+
+System is running and ready now!
+
+**Open: http://localhost:3000**
+
+---
+
+**Print this card. Keep it handy!** 📋
