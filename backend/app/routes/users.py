@@ -18,8 +18,8 @@ from ..utils.encryption import EncryptionManager
 
 router = APIRouter(prefix="/users", tags=["users"])
 
-# Security
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# Security - use argon2 instead of bcrypt to avoid issues
+pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
 SECRET_KEY = "your-secret-key-change-in-production"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
@@ -31,6 +31,8 @@ user_credentials = {}  # user_id -> {password_hash, email}
 
 def hash_password(password: str) -> str:
     """Hash a password"""
+    # Truncate to 72 bytes for bcrypt compatibility
+    password = password[:72]
     return pwd_context.hash(password)
 
 

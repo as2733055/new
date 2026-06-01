@@ -1,0 +1,7 @@
+{
+  "version": "1.0.0+1",
+  "flavor": "production",
+  "bundleId": "com.mobilechat.app",
+  "packageId": "com.mobilechat.app",
+  "namePrefix": "Chat"
+}

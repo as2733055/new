@@ -2,7 +2,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
-from .routes import users, messages, websocket
+from .routes import users, messages, websocket, room_websocket
 from .config import settings
 
 # Create FastAPI app
@@ -31,6 +31,7 @@ app.add_middleware(
 app.include_router(users.router)
 app.include_router(messages.router)
 app.include_router(websocket.router)
+app.include_router(room_websocket.router)
 
 
 @app.get("/")
